@@ -1,5 +1,3 @@
-import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
 import { getOverallMetrics } from "@/lib/analytics";
 import { auth } from "@/auth";
 
@@ -11,38 +9,50 @@ export async function POST(req: Request) {
   }
 
   const { messages } = await req.json();
-  
-  // Grounding the AI with real application data
+  const lastMessage = messages[messages.length - 1];
+  const query = (lastMessage?.content || "").toLowerCase();
+
   const metrics = await getOverallMetrics();
+  
+  let responseText = "";
 
-  const systemPrompt = `
-You are a Business Intelligence AI Assistant for PT MACROPRIMA PANGAN UTAMA (an agricultural production company).
-Your role is to help managers and executives understand their business performance.
+  // DETERMINISTIC INTENT ENGINE
+  if (query.includes("untung") || query.includes("profit") || query.includes("laba")) {
+    responseText = `Bulan ini, total keuntungan bersih mencapai Rp ${metrics.profit.toLocaleString("id-ID")}. Margin keuntungan berada pada level ${metrics.margin.toFixed(2)}% dari total pendapatan Rp ${metrics.revenue.toLocaleString("id-ID")}.`;
+  } 
+  else if (query.includes("turun") || query.includes("penurunan") || query.includes("decline") || query.includes("drop")) {
+    if (metrics.margin < 20) {
+      responseText = `Terdapat indikasi penurunan margin di bawah target 20% (Saat ini: ${metrics.margin.toFixed(2)}%). Sebaiknya Anda meninjau kembali biaya produksi (HPP) yang saat ini mencapai Rp ${metrics.totalCost.toLocaleString("id-ID")}.`;
+    } else {
+      responseText = `Berdasarkan data agregat, performa margin perusahaan masih sehat di angka ${metrics.margin.toFixed(2)}%. Anda dapat melihat rincian laporan penjualan untuk produk spesifik.`;
+    }
+  }
+  else if (query.includes("performa") || query.includes("ringkas") || query.includes("performance") || query.includes("summary")) {
+    responseText = `Ringkasan Performa:
+- Total Pendapatan: Rp ${metrics.revenue.toLocaleString("id-ID")}
+- Total Biaya: Rp ${metrics.totalCost.toLocaleString("id-ID")}
+- Keuntungan Kotor: Rp ${metrics.profit.toLocaleString("id-ID")}
+- Volume Produksi: ${metrics.productionVolume} unit
+- Volume Penjualan: ${metrics.salesVolume} unit`;
+  }
+  else if (query.includes("habis") || query.includes("stok") || query.includes("stockout") || query.includes("risk")) {
+    responseText = `Secara agregat, kami memantau pergerakan pada ${metrics.products} produk aktif. Silakan cek modul "Pusat Peringatan" (Smart Alerts) untuk melihat daftar produk spesifik yang saat ini memiliki stok kritis (di bawah 50 unit) atau berisiko kehabisan (stockout risk).`;
+  }
+  else if (query.includes("produksi") || query.includes("production")) {
+    responseText = `Hingga saat ini, total volume produksi tercatat sebanyak ${metrics.productionVolume} unit dari semua lini produksi yang berjalan.`;
+  }
+  else {
+    responseText = `Maaf, saya belum memiliki informasi yang cukup untuk menjawab pertanyaan tersebut secara spesifik. 
+    
+Topik yang dapat saya jawab meliputi:
+- Ringkasan performa & pendapatan
+- Analisis profit dan margin
+- Risiko stok & produksi
+- Peringatan anomali bisnis`;
+  }
 
-Answer concisely, professionally, and directly using the following GROUND TRUTH DATA:
-- Total Revenue: Rp ${metrics.revenue.toLocaleString("id-ID")}
-- Total Cost (COGS): Rp ${metrics.totalCost.toLocaleString("id-ID")}
-- Total Gross Profit: Rp ${metrics.profit.toLocaleString("id-ID")}
-- Average Margin: ${metrics.margin.toFixed(2)}%
-- Total Production Volume: ${metrics.productionVolume} units
-- Total Sales Volume: ${metrics.salesVolume} units
-- Active Products: ${metrics.products}
-
-CRITICAL RULES:
-1. DO NOT hallucinate database facts. Only use the provided GROUND TRUTH DATA.
-2. If a user asks a specific question about data not provided above (e.g. "what is the specific yield of product X?"), say clearly that you don't have access to that specific data right now, but you can answer overall business performance.
-3. Be professional and concise. Do not use overly enthusiastic language like "Sure! 😊".
-4. Recommend actions based on the data if appropriate (e.g., "Margin is below 20%, consider reviewing production costs").
-5. The user is logged in as: ${session.user.name} (Role: ${session.user.role}).
-
-Please answer the user's latest query considering the context above.
-  `;
-
-  const result = streamText({
-    model: google("gemini-2.5-pro"),
-    system: systemPrompt,
-    messages,
+  // To keep compatibility with stream parsing on the client, we just return JSON and update the client
+  return new Response(JSON.stringify({ text: responseText }), {
+    headers: { "Content-Type": "application/json" }
   });
-
-  return result.toTextStreamResponse();
 }

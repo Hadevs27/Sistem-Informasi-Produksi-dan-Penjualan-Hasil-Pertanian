@@ -33,26 +33,10 @@ export default function AIPage() {
 
       if (!res.body) throw new Error("No response body");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      
-      let assistantMessage = "";
+      const data = await res.json();
       const assistId = (Date.now() + 1).toString();
       
-      setMessages(prev => [...prev, { id: assistId, role: "assistant", content: "" }]);
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        
-        // Very basic stream reading for toTextStreamResponse
-        const chunk = decoder.decode(value, { stream: true });
-        assistantMessage += chunk;
-        
-        setMessages(prev => 
-          prev.map(m => m.id === assistId ? { ...m, content: assistantMessage } : m)
-        );
-      }
+      setMessages(prev => [...prev, { id: assistId, role: "assistant", content: data.text }]);
     } catch (error) {
       console.error(error);
     } finally {
