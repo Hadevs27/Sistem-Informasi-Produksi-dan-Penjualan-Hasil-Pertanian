@@ -83,7 +83,7 @@ const demoAccounts = [
   { role: "Manajer", email: "manajer@example.com" },
 ];
 
-export function DemoAccounts({ dict }: { dict: any }) {
+export function DemoAccounts({ dict }: { dict: ReturnType<typeof import("@/messages").getDictionary> }) {
   const [open, setOpen] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
 
