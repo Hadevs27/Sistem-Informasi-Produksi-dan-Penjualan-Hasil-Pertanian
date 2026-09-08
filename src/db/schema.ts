@@ -18,6 +18,10 @@ const timestamps = {
 
 export const roleEnum = pgEnum("role", ["ADMIN", "PEGAWAI", "MANAJER"]);
 export const qualityEnum = pgEnum("quality", ["SANGAT_BAIK", "BAIK", "SEDANG", "BURUK"]);
+export const alertTypeEnum = pgEnum("alert_type", ["LOW_STOCK", "STOCKOUT_RISK", "SALES_DROP", "SALES_SPIKE", "HIGH_WASTE", "LOW_YIELD", "NEGATIVE_MARGIN", "COST_INCREASE", "PRODUCTION_DELAY", "UNUSUAL_ACTIVITY"]);
+export const alertSeverityEnum = pgEnum("alert_severity", ["INFO", "WARNING", "CRITICAL"]);
+export const alertStatusEnum = pgEnum("alert_status", ["UNREAD", "ACKNOWLEDGED", "RESOLVED"]);
+export const entityTypeEnum = pgEnum("entity_type", ["PRODUCT", "PRODUCTION", "HARVEST", "SALE"]);
 
 export const users = pgTable(
   "users",
@@ -145,3 +149,80 @@ export const settings = pgTable("settings", {
 });
 
 export type User = typeof users.$inferSelect;
+
+export const alerts = pgTable(
+  "alerts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    type: alertTypeEnum("type").notNull(),
+    severity: alertSeverityEnum("severity").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    entityType: entityTypeEnum("entity_type"),
+    entityId: uuid("entity_id"),
+    status: alertStatusEnum("status").default("UNREAD").notNull(),
+    detectedAt: timestamp("detected_at", { withTimezone: true }).defaultNow().notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("alerts_status_idx").on(table.status),
+    index("alerts_detected_at_idx").on(table.detectedAt),
+  ],
+);
+
+export const traceabilityCodes = pgTable(
+  "traceability_codes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    code: text("code").notNull().unique(),
+    entityType: entityTypeEnum("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    url: text("url").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("traceability_codes_code_idx").on(table.code),
+    index("traceability_codes_entity_idx").on(table.entityType, table.entityId),
+  ],
+);
+
+export const forecasts = pgTable(
+  "forecasts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    forecastDate: date("forecast_date").notNull(),
+    horizonDays: numeric("horizon_days").notNull(),
+    expectedDemand: numeric("expected_demand", { precision: 14, scale: 2 }).notNull(),
+    lowerBound: numeric("lower_bound", { precision: 14, scale: 2 }),
+    upperBound: numeric("upper_bound", { precision: 14, scale: 2 }),
+    confidence: text("confidence"), // HIGH, MEDIUM, LOW
+    ...timestamps,
+  },
+  (table) => [
+    index("forecasts_product_idx").on(table.productId),
+    index("forecasts_date_idx").on(table.forecastDate),
+  ],
+);
+
+export const aiConversations = pgTable("ai_conversations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  ...timestamps,
+});
+
+export const aiMessages = pgTable("ai_messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  conversationId: uuid("conversation_id")
+    .notNull()
+    .references(() => aiConversations.id, { onDelete: "cascade" }),
+  role: text("role").notNull(), // 'user' | 'assistant'
+  content: text("content").notNull(),
+  ...timestamps,
+});

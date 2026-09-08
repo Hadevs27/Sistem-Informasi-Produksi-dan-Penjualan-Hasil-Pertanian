@@ -2,6 +2,14 @@
 
 Sistem Informasi Produksi dan Penjualan Hasil Pertanian berbasis Next.js 15, Auth.js v5, Drizzle ORM, dan Neon PostgreSQL. Aplikasi ini mengelola alur bisnis dari kelompok tani, petani, panen, produksi, produk jadi, penjualan, laporan, hingga analisis laba-rugi.
 
+## Fitur Unggulan (Tier A)
+Pembaruan terbaru membawa fitur setingkat *Enterprise*:
+1. **Demand Forecasting**: Peramalan permintaan produk dengan data historis untuk memproyeksikan kebutuhan stok di masa depan.
+2. **Smart Alerts**: Deteksi anomali seperti risiko stok habis, margin negatif, atau fluktuasi produksi secara otomatis.
+3. **QR / Barcode Traceability**: Pelacakan riwayat batch produksi mulai dari bahan baku hingga produk jadi yang dapat dipindai oleh pihak eksternal secara aman.
+4. **AI Business Intelligence**: Asisten AI internal yang dapat menganalisis data operasional perusahaan (pendapatan, biaya, profit) secara real-time.
+5. **Internationalization (i18n)**: Dukungan multi-bahasa (Bahasa Indonesia dan English) pada semua antarmuka.
+
 ## Overview
 
 Tujuan sistem adalah mengurangi pencatatan manual dan menyediakan monitoring produksi, penjualan, serta profit secara cepat dan akurat. UI dirancang modern, minimalis, responsive, accessible, dan enterprise-grade sesuai SDD.
@@ -16,7 +24,7 @@ flowchart LR
   D --> E["Produk Jadi"]
   E --> F["Penjualan"]
   F --> G["Laporan"]
-  G --> H["Analisis Laba Rugi"]
+  G --> H["AI Analytics & Forecasting"]
 ```
 
 ## Kerangka Berpikir

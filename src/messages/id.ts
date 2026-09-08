@@ -1,0 +1,39 @@
+export const id = {
+  nav: {
+    dashboard: "Dashboard",
+    kelompokTani: "Kelompok Tani",
+    petani: "Petani",
+    bahanBaku: "Bahan Baku",
+    produk: "Produk",
+    hasilPanen: "Hasil Panen",
+    produksi: "Produksi",
+    penjualan: "Penjualan",
+    laporanProduksi: "Laporan Produksi",
+    laporanPenjualan: "Laporan Penjualan",
+    labaRugi: "Laba Rugi",
+    forecast: "Peramalan (Forecast)",
+    alerts: "Pusat Peringatan",
+    traceability: "Pelacakan (Traceability)",
+    aiAssistant: "Asisten AI",
+    users: "Pengguna",
+    settings: "Pengaturan",
+  },
+  common: {
+    save: "Simpan",
+    cancel: "Batal",
+    delete: "Hapus",
+    edit: "Edit",
+    search: "Cari...",
+    loading: "Memuat...",
+    noData: "Tidak ada data.",
+    error: "Terjadi kesalahan.",
+    success: "Berhasil.",
+  },
+  alerts: {
+    title: "Peringatan Cerdas",
+    empty: "Tidak ada peringatan baru.",
+  },
+  forecast: {
+    title: "Peramalan Permintaan",
+  }
+};

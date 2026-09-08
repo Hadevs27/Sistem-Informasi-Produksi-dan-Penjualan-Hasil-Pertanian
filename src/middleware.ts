@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 import { canAccessPath, type UserRole } from "@/lib/rbac";
 
-const publicRoutes = ["/login"];
+const publicRoutes = ["/login", "/t/"];
 const { auth } = NextAuth(authConfig);
 
 export default auth((request) => {

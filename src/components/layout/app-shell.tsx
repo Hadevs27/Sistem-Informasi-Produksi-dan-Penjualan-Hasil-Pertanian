@@ -5,15 +5,19 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   BarChart3,
+  Bell,
   Boxes,
   ChevronLeft,
   FileText,
   LayoutDashboard,
   Menu,
+  MessageSquareText,
   Package,
+  ScanLine,
   Settings,
   ShoppingCart,
   Sprout,
+  TrendingUp,
   Users,
   Wheat,
   X,
@@ -22,21 +26,27 @@ import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/rbac";
 import { canAccessPath } from "@/lib/rbac";
 import { LogoutButton } from "@/components/layout/logout-button";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useI18n } from "@/components/i18n-provider";
 
-const navigation = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/master/kelompok-tani", label: "Kelompok Tani", icon: Sprout },
-  { href: "/master/petani", label: "Petani", icon: Users },
-  { href: "/master/bahan-baku", label: "Bahan Baku", icon: Wheat },
-  { href: "/master/produk", label: "Produk", icon: Package },
-  { href: "/transaksi/hasil-panen", label: "Hasil Panen", icon: Boxes },
-  { href: "/transaksi/produksi", label: "Produksi", icon: BarChart3 },
-  { href: "/transaksi/penjualan", label: "Penjualan", icon: ShoppingCart },
-  { href: "/laporan/produksi", label: "Laporan Produksi", icon: FileText },
-  { href: "/laporan/penjualan", label: "Laporan Penjualan", icon: FileText },
-  { href: "/laporan/laba-rugi", label: "Laba Rugi", icon: BarChart3 },
-  { href: "/users", label: "Pengguna", icon: Users },
-  { href: "/settings", label: "Pengaturan", icon: Settings },
+const getNavigation = (dict: ReturnType<typeof import("@/messages").getDictionary>) => [
+  { href: "/dashboard", label: dict.nav.dashboard, icon: LayoutDashboard },
+  { href: "/master/kelompok-tani", label: dict.nav.kelompokTani, icon: Sprout },
+  { href: "/master/petani", label: dict.nav.petani, icon: Users },
+  { href: "/master/bahan-baku", label: dict.nav.bahanBaku, icon: Wheat },
+  { href: "/master/produk", label: dict.nav.produk, icon: Package },
+  { href: "/transaksi/hasil-panen", label: dict.nav.hasilPanen, icon: Boxes },
+  { href: "/transaksi/produksi", label: dict.nav.produksi, icon: BarChart3 },
+  { href: "/transaksi/penjualan", label: dict.nav.penjualan, icon: ShoppingCart },
+  { href: "/laporan/produksi", label: dict.nav.laporanProduksi, icon: FileText },
+  { href: "/laporan/penjualan", label: dict.nav.laporanPenjualan, icon: FileText },
+  { href: "/laporan/laba-rugi", label: dict.nav.labaRugi, icon: BarChart3 },
+  { href: "/laporan/forecast", label: dict.nav.forecast, icon: TrendingUp },
+  { href: "/alerts", label: dict.nav.alerts, icon: Bell },
+  { href: "/traceability", label: dict.nav.traceability, icon: ScanLine },
+  { href: "/ai", label: dict.nav.aiAssistant, icon: MessageSquareText },
+  { href: "/users", label: dict.nav.users, icon: Users },
+  { href: "/settings", label: dict.nav.settings, icon: Settings },
 ];
 
 export function AppShell({
@@ -51,7 +61,10 @@ export function AppShell({
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const visibleNavigation = useMemo(() => navigation.filter((item) => canAccessPath(role, item.href)), [role]);
+  const { dict } = useI18n();
+  
+  const navigation = useMemo(() => getNavigation(dict), [dict]);
+  const visibleNavigation = useMemo(() => navigation.filter((item) => canAccessPath(role, item.href)), [role, navigation]);
 
   const sidebar = (
     <aside
@@ -144,14 +157,16 @@ export function AppShell({
           </button>
           <div className="flex min-w-0 flex-1 items-center">
             <label className="sr-only" htmlFor="global-search">
-              Search
+              {dict.common.search}
             </label>
             <input
               id="global-search"
-              className="h-11 w-full max-w-xl rounded-xl border bg-slate-50 px-4 text-sm focus:bg-white"
+              placeholder={dict.common.search}
+              className="h-11 w-full max-w-xl rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+          <LanguageSwitcher />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
             {name.charAt(0).toUpperCase()}
           </div>
         </header>
