@@ -35,5 +35,11 @@ export const en = {
   },
   forecast: {
     title: "Demand Forecasting",
+  },
+  login: {
+    demoAccounts: "Demo Accounts",
+    clickToTry: "Click to use this demo account",
+    selected: "Selected",
+    useAccount: "Use demo account",
   }
 };

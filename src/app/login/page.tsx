@@ -12,6 +12,8 @@ import { loginAction } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { DemoAccounts, FloatingProduct, MotionBlock, MotionFeatureCard } from "./login-motion";
+import { getLocale } from "@/lib/i18n";
+import { getDictionary } from "@/messages";
 
 export default async function LoginPage({
   searchParams,
@@ -19,6 +21,8 @@ export default async function LoginPage({
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const params = await searchParams;
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
   const features = [
     {
       icon: PackageCheck,
@@ -167,7 +171,7 @@ export default async function LoginPage({
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </form>
-            <DemoAccounts />
+            <DemoAccounts dict={dict} />
           </MotionBlock>
           <p className="mt-6 text-center text-xs text-slate-500">
             Protected by Auth.js session management and enterprise RBAC.

@@ -35,5 +35,11 @@ export const id = {
   },
   forecast: {
     title: "Peramalan Permintaan",
+  },
+  login: {
+    demoAccounts: "Akun Demo",
+    clickToTry: "Klik untuk menggunakan akun demo",
+    selected: "Terpilih",
+    useAccount: "Gunakan akun demo",
   }
 };
